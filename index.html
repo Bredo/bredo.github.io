@@ -1,72 +1,1091 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=640" />
+<html lang="en">
 
-    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
-    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Context Recorder Pro</title>
+  <script type="module">
+    import * as MediaBunny from 'mediabunny.min.mjs';
+    window.MediaBunny = MediaBunny;
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --success: #16a34a;
+      --success-hover: #15803d;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+    }
 
-    <script type="text/javascript" src="javascripts/modernizr.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function () {
-        $('#main_content').headsmart()
-      })
-    </script>
-    <title>Bredo @ GitHub by Bredo</title>
-  </head>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
 
-  <body>
-    <a id="forkme_banner" href="https://github.com/Bredo">View on GitHub</a>
-    <div class="shell">
+    .container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    }
 
-      <header>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <h1>Bredo @ GitHub</h1>
-            <h2>A list over my public GitHub-projects</h2>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-      </header>
+    h1 {
+      font-size: 1.75rem;
+      margin-top: 0;
+      margin-bottom: 8px;
+      text-align: center;
+    }
 
-      <div id="no-downloads">
-        <span class="inner">
-        </span>
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* Source Selector Grid */
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .source-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      background: #fafafa;
+    }
+
+    .source-card:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .source-card.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .source-card input[type="checkbox"] {
+      pointer-events: none;
+      transform: scale(1.2);
+    }
+
+    .source-icon {
+      font-size: 1.5rem;
+    }
+
+    .source-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Controls Section */
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background-color: var(--danger-hover);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+    }
+
+    .btn-success:hover {
+      background-color: var(--success-hover);
+    }
+
+    .btn:disabled {
+      background-color: #cbd5e1;
+      cursor: not-allowed;
+      color: #94a3b8;
+    }
+
+    /* PiP Configuration Section */
+    .pip-config-panel {
+      display: none;
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+      padding-top: 24px;
+      text-align: center;
+    }
+
+    .pip-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      max-width: 320px;
+      margin: 16px auto;
+    }
+
+    .pip-box {
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: white;
+      transition: all 0.2s;
+    }
+
+    .pip-box:hover {
+      background: #f8fafc;
+    }
+
+    .pip-box.selected {
+      border-color: var(--success);
+      background: #f0fdf4;
+      color: var(--success-hover);
+    }
+
+    /* Previews & Status */
+    .preview-container {
+      margin-top: 20px;
+      display: none;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #videoPreview {
+      width: 100%;
+      max-height: 320px;
+      display: block;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--danger);
+      margin-top: 12px;
+      display: none;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--danger);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .processing-overlay {
+      display: none;
+      font-weight: 600;
+      color: var(--primary);
+      margin-top: 16px;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>📽️ Twenty Video recorder</h1>
+    <p class="subtitle">It's more than AI slop. It's AI slop that works.</p>
+
+    <div class="source-grid" id="sourceGrid">
+      <div class="source-card" data-source="screen">
+        <span class="source-icon">🖥️</span>
+        <span class="source-label">Screen Share</span>
+        <input type="checkbox" id="chkScreen">
       </div>
-
-
-      <span class="banner-fix"></span>
-
-
-      <section id="main_content">
-        <h1>Projects</h1>
-
-<h2>hex2rbg</h2>
-
-<p>A very light PHP script, witch easy lets you convert HEX-color-values to RBG-color-arrays, and reverse.
-<a href="https://github.com/Bredo/hex2rbg">See more here...</a></p>
-      </section>
-
-      <footer>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <p>Projects by <a href="https://github.com/Bredo">Bredo</a> can be found on <a href="https://github.com/Bredo">GitHub</a></p>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
-        <span class="octocat"></span>
-      </footer>
-
+      <div class="source-card" data-source="webcam">
+        <span class="source-icon">📷</span>
+        <span class="source-label">Webcam</span>
+        <input type="checkbox" id="chkWebcam">
+      </div>
+      <div class="source-card" data-source="mic">
+        <span class="source-icon">🎙️</span>
+        <span class="source-label">Microphone</span>
+        <input type="checkbox" id="chkMic">
+      </div>
     </div>
 
-    
-  </body>
+    <div class="controls">
+      <button id="startBtn" class="btn" disabled>Start Capture Session</button>
+      <button id="stopBtn" class="btn btn-danger" style="display: none;">Stop Recording</button>
+    </div>
+
+    <div style="text-align: center;">
+      <div id="status" class="status-badge">
+        <span class="pulse-dot"></span> RECORDING LIVE...
+      </div>
+    </div>
+
+    <div class="preview-container" id="previewWrapper">
+      <video id="videoPreview" autoplay muted playsinline></video>
+    </div>
+
+    <div class="pip-config-panel" id="pipConfigPanel">
+      <h3 id="panelTitle">Configure Your Recording</h3>
+
+      <!-- PiP Layout Options (Only visible if both screen & webcam are captured) -->
+      <div id="pipOptionsContainer">
+        <p class="subtitle">Both screen and webcam tracks were captured. Select your preferred Picture-in-Picture layout
+          quadrant:</p>
+        <div class="pip-grid">
+          <div class="pip-box" data-corner="top-left">Top Left</div>
+          <div class="pip-box" data-corner="top-right">Top Right</div>
+          <div class="pip-box" data-corner="bottom-left">Bottom Left</div>
+          <div class="pip-box selected" data-corner="bottom-right">Bottom Right</div>
+        </div>
+        <div style="margin: 20px auto; max-width: 320px; text-align: left;">
+          <label for="pipSizeSlider" style="display: block; font-weight: 600; margin-bottom: 8px;">
+            Picture-in-Picture Size: <span id="pipSizeVal">20%</span>
+          </label>
+          <input type="range" id="pipSizeSlider" min="10" max="50" value="20" style="width: 100%;">
+        </div>
+      </div>
+
+      <!-- Trim Controls (Always visible) -->
+      <div
+        style="margin: 20px auto; max-width: 320px; text-align: left; border-top: 1px solid var(--border); padding-top: 16px;">
+        <h4 style="margin: 0 0 12px 0;">Trim Video</h4>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">
+            Start Time: <span id="trimStartVal">0.0</span>s
+          </label>
+          <input type="range" id="trimStartSlider" min="0" max="10" step="0.1" value="0" style="width: 100%;">
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">
+            End Time: <span id="trimEndVal">0.0</span>s
+          </label>
+          <input type="range" id="trimEndSlider" min="0" max="10" step="0.1" value="10" style="width: 100%;">
+        </div>
+      </div>
+
+      <!-- Live Preview Container (HTML Video Overlays) -->
+      <div id="previewContainer"
+        style="position: relative; margin: 20px auto; max-width: 480px; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <!-- Screen Video (Background) -->
+        <video id="previewScreenVid" style="width: 100%; height: 100%; object-fit: contain; display: none;"
+          playsinline></video>
+        <!-- Webcam Video (PiP Overlay or Fullscreen) -->
+        <video id="previewWebcamVid"
+          style="position: absolute; display: none; object-fit: cover; transition: all 0.1s ease;" playsinline></video>
+        <!-- Mic Audio -->
+        <audio id="previewMicAud" style="display: none;"></audio>
+      </div>
+
+      <!-- Video Playback Controls -->
+      <div
+        style="margin: 10px auto; max-width: 480px; display: flex; align-items: center; gap: 12px; justify-content: center; background: #f3f4f6; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
+        <button id="previewPlayBtn" class="btn"
+          style="padding: 6px 16px; font-size: 0.875rem; background: var(--primary); font-weight: 600;">Play</button>
+        <input type="range" id="previewTimeline" min="0" max="10" step="0.1" value="0"
+          style="flex: 1; height: 6px; cursor: pointer;">
+        <span id="previewTimeVal"
+          style="font-size: 0.85rem; font-weight: 700; white-space: nowrap; color: var(--text-muted);">0:00 /
+          0:00</span>
+      </div>
+
+      <button id="exportBtn" class="btn btn-success" style="width: 100%; max-width: 320px; margin-top: 12px;">Transcode
+        & Sync File</button>
+      <div class="processing-overlay" id="processingStatus">⚙️ Rendering composited layout engine frames... Please
+        wait...</div>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId') || '';
+    const nonce = urlParams.get('nonce') || '';
+    const timestamp = urlParams.get('timestamp') || '';
+    const signature = urlParams.get('signature') || '';
+    const serverUrl = urlParams.get('serverUrl') || '';
+
+    // State Matrix Hooks
+    let screenStream = null;
+    let webcamStream = null;
+    let micStream = null;
+
+    let screenRecorder = null;
+    let webcamRecorder = null;
+    let micRecorder = null;
+
+    let screenChunks = [];
+    let webcamChunks = [];
+    let micChunks = [];
+
+    let isRecording = false;
+    let selectedCorner = 'bottom-right';
+    let pipSizeScale = 0.20;
+    let trimStart = 0;
+    let trimEnd = 0;
+
+    // Request permissions for camera and microphone on page load
+    async function requestInitialPermissions() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream.getTracks().forEach(track => track.stop());
+      } catch (err) {
+        console.warn('Initial camera/microphone permission prompt failed or was denied:', err);
+      }
+    }
+    requestInitialPermissions();
+
+    // DOM Target Handles
+    const sourceGrid = document.getElementById('sourceGrid');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusBadge = document.getElementById('status');
+    const previewWrapper = document.getElementById('previewWrapper');
+    const videoPreview = document.getElementById('videoPreview');
+    const pipConfigPanel = document.getElementById('pipConfigPanel');
+    const exportBtn = document.getElementById('exportBtn');
+    const processingStatus = document.getElementById('processingStatus');
+    const pipSizeSlider = document.getElementById('pipSizeSlider');
+    const pipSizeVal = document.getElementById('pipSizeVal');
+    const trimStartSlider = document.getElementById('trimStartSlider');
+    const trimEndSlider = document.getElementById('trimEndSlider');
+    const trimStartVal = document.getElementById('trimStartVal');
+    const trimEndVal = document.getElementById('trimEndVal');
+    const pipOptionsContainer = document.getElementById('pipOptionsContainer');
+    const previewScreenVid = document.getElementById('previewScreenVid');
+    const previewWebcamVid = document.getElementById('previewWebcamVid');
+    const previewMicAud = document.getElementById('previewMicAud');
+    const previewPlayBtn = document.getElementById('previewPlayBtn');
+    const previewTimeline = document.getElementById('previewTimeline');
+    const previewTimeVal = document.getElementById('previewTimeVal');
+
+    // UI Configuration Handlers
+    function updatePipLayout() {
+      if (!previewWebcamVid) return;
+
+      const hasScreen = screenChunks.length > 0;
+      const hasWebcam = webcamChunks.length > 0;
+
+      if (hasScreen && hasWebcam) {
+        previewWebcamVid.style.display = 'block';
+        previewWebcamVid.style.width = (pipSizeScale * 100) + '%';
+        previewWebcamVid.style.borderRadius = '5%';
+
+        previewWebcamVid.style.top = 'auto';
+        previewWebcamVid.style.bottom = 'auto';
+        previewWebcamVid.style.left = 'auto';
+        previewWebcamVid.style.right = 'auto';
+
+        if (selectedCorner === 'top-left') {
+          previewWebcamVid.style.top = '4%';
+          previewWebcamVid.style.left = '4%';
+        } else if (selectedCorner === 'top-right') {
+          previewWebcamVid.style.top = '4%';
+          previewWebcamVid.style.right = '4%';
+        } else if (selectedCorner === 'bottom-left') {
+          previewWebcamVid.style.bottom = '4%';
+          previewWebcamVid.style.left = '4%';
+        } else if (selectedCorner === 'bottom-right') {
+          previewWebcamVid.style.bottom = '4%';
+          previewWebcamVid.style.right = '4%';
+        }
+      } else if (hasWebcam) {
+        previewWebcamVid.style.display = 'block';
+        previewWebcamVid.style.width = '100%';
+        previewWebcamVid.style.height = '100%';
+        previewWebcamVid.style.top = '0';
+        previewWebcamVid.style.left = '0';
+        previewWebcamVid.style.borderRadius = '0';
+      } else {
+        previewWebcamVid.style.display = 'none';
+      }
+    }
+
+    let isPlaying = false;
+
+    function syncPlaybackTime(time) {
+      if (previewScreenVid) previewScreenVid.currentTime = time;
+      if (previewWebcamVid) previewWebcamVid.currentTime = time;
+      if (previewMicAud) previewMicAud.currentTime = time;
+    }
+
+    previewPlayBtn.onclick = () => {
+      const primaryVideo = (screenChunks.length > 0) ? previewScreenVid : (webcamChunks.length > 0 ? previewWebcamVid : null);
+      if (!primaryVideo) return;
+
+      if (isPlaying) {
+        if (previewScreenVid) previewScreenVid.pause();
+        if (previewWebcamVid) previewWebcamVid.pause();
+        if (previewMicAud) previewMicAud.pause();
+        previewPlayBtn.innerText = 'Play';
+        isPlaying = false;
+      } else {
+        const curr = primaryVideo.currentTime;
+        if (curr >= trimEnd || curr < trimStart) {
+          syncPlaybackTime(trimStart);
+        }
+        if (previewScreenVid) previewScreenVid.play().catch(e => console.warn(e));
+        if (previewWebcamVid) previewWebcamVid.play().catch(e => console.warn(e));
+        if (previewMicAud) previewMicAud.play().catch(e => console.warn(e));
+        previewPlayBtn.innerText = 'Pause';
+        isPlaying = true;
+      }
+    };
+
+    previewTimeline.oninput = function () {
+      const val = parseFloat(this.value);
+      syncPlaybackTime(val);
+      previewTimeVal.innerText = formatDurationText(val) + ' / ' + formatDurationText(trimEnd);
+    };
+
+    function formatDurationText(sec) {
+      if (isNaN(sec) || sec === Infinity) return '0:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    pipSizeSlider.oninput = function () {
+      pipSizeScale = parseFloat(this.value) / 100;
+      pipSizeVal.innerText = this.value + '%';
+      updatePipLayout();
+    };
+
+    trimStartSlider.oninput = function () {
+      const val = parseFloat(this.value);
+      if (val >= trimEnd) {
+        this.value = trimEnd - 0.1;
+        trimStart = trimEnd - 0.1;
+      } else {
+        trimStart = val;
+      }
+      trimStartVal.innerText = trimStart.toFixed(1);
+      syncPlaybackTime(trimStart);
+    };
+
+    trimEndSlider.oninput = function () {
+      const val = parseFloat(this.value);
+      if (val <= trimStart) {
+        this.value = trimStart + 0.1;
+        trimEnd = trimStart + 0.1;
+      } else {
+        trimEnd = val;
+      }
+      trimEndVal.innerText = trimEnd.toFixed(1);
+      syncPlaybackTime(trimEnd);
+    };
+
+    sourceGrid.querySelectorAll('.source-card').forEach(card => {
+      card.onclick = () => {
+        if (isRecording) return;
+        const cb = card.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        card.classList.toggle('active', cb.checked);
+        validateSelections();
+      };
+    });
+
+    function validateSelections() {
+      const anyChecked = [...sourceGrid.querySelectorAll('input[type="checkbox"]')].some(c => c.checked);
+      startBtn.disabled = !anyChecked;
+    }
+
+    document.querySelectorAll('.pip-box').forEach(box => {
+      box.onclick = () => {
+        document.querySelectorAll('.pip-box').forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+        selectedCorner = box.getAttribute('data-corner');
+        updatePipLayout();
+      };
+    });
+
+    startBtn.onclick = async () => {
+      const useScreen = document.getElementById('chkScreen').checked;
+      const useWebcam = document.getElementById('chkWebcam').checked;
+      const useMic = document.getElementById('chkMic').checked;
+
+      screenChunks = []; webcamChunks = []; micChunks = [];
+      pipConfigPanel.style.display = 'none';
+
+      try {
+        if (useScreen) {
+          screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          const screenVideoTrack = screenStream.getVideoTracks()[0];
+          if (screenVideoTrack) {
+            screenVideoTrack.onended = () => {
+              if (isRecording) {
+                stopBtn.click();
+              }
+            };
+          }
+        }
+        if (useWebcam || useMic) {
+          const constraints = { video: useWebcam, audio: useMic };
+          const userMedia = await navigator.mediaDevices.getUserMedia(constraints);
+          if (useWebcam) webcamStream = new MediaStream(userMedia.getVideoTracks());
+          if (useMic) micStream = new MediaStream(userMedia.getAudioTracks());
+        }
+
+        if (useWebcam) {
+          videoPreview.srcObject = webcamStream;
+          previewWrapper.style.display = 'block';
+        } else if (useScreen) {
+          videoPreview.srcObject = screenStream;
+          previewWrapper.style.display = 'block';
+        } else {
+          previewWrapper.style.display = 'none';
+        }
+
+        const commonMime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+
+        if (useScreen) {
+          screenRecorder = new MediaRecorder(screenStream, { mimeType: commonMime });
+          screenRecorder.ondataavailable = e => { if (e.data.size > 0) screenChunks.push(e.data); };
+          screenRecorder.start();
+        }
+        if (useWebcam) {
+          webcamRecorder = new MediaRecorder(webcamStream, { mimeType: commonMime });
+          webcamRecorder.ondataavailable = e => { if (e.data.size > 0) webcamChunks.push(e.data); };
+          webcamRecorder.start();
+        }
+        if (useMic) {
+          micRecorder = new MediaRecorder(micStream, { mimeType: 'audio/webm' });
+          micRecorder.ondataavailable = e => { if (e.data.size > 0) micChunks.push(e.data); };
+          micRecorder.start();
+        }
+
+        isRecording = true;
+        toggleUiState(true);
+
+      } catch (err) {
+        console.error(err);
+        alert("Media initiation failed: " + err.message);
+        cleanHardwareTracks();
+      }
+    };
+
+    stopBtn.onclick = () => {
+      toggleUiState(false);
+      isRecording = false;
+
+      let stopPromises = [];
+
+      if (screenRecorder && screenRecorder.state !== 'inactive') stopPromises.push(new Promise(r => { screenRecorder.onstop = r; screenRecorder.stop(); }));
+      if (webcamRecorder && webcamRecorder.state !== 'inactive') stopPromises.push(new Promise(r => { webcamRecorder.onstop = r; webcamRecorder.stop(); }));
+      if (micRecorder && micRecorder.state !== 'inactive') stopPromises.push(new Promise(r => { micRecorder.onstop = r; micRecorder.stop(); }));
+
+      Promise.all(stopPromises).then(() => {
+        cleanHardwareTracks();
+        previewWrapper.style.display = 'none';
+
+        const dynamicScreen = screenChunks.length > 0;
+        const dynamicWebcam = webcamChunks.length > 0;
+
+        if (dynamicScreen || dynamicWebcam) {
+          pipConfigPanel.style.display = 'block';
+          if (dynamicScreen && dynamicWebcam) {
+            pipOptionsContainer.style.display = 'block';
+          } else {
+            pipOptionsContainer.style.display = 'none';
+          }
+          startPreviewLoop();
+        } else {
+          alert("No video recorded.");
+        }
+      });
+    };
+
+    exportBtn.onclick = () => {
+      generateFinalComposition();
+    };
+
+    let isPreviewing = false;
+
+    function startPreviewLoop() {
+      isPreviewing = true;
+      const hasScreen = screenChunks.length > 0;
+      const hasWebcam = webcamChunks.length > 0;
+      const hasMic = micChunks.length > 0;
+
+      if (hasScreen) {
+        previewScreenVid.src = URL.createObjectURL(new Blob(screenChunks, { type: 'video/webm' }));
+        previewScreenVid.style.display = 'block';
+      } else {
+        previewScreenVid.style.display = 'none';
+      }
+
+      if (hasWebcam) {
+        previewWebcamVid.src = URL.createObjectURL(new Blob(webcamChunks, { type: 'video/webm' }));
+      }
+
+      if (hasMic) {
+        previewMicAud.src = URL.createObjectURL(new Blob(micChunks, { type: 'audio/webm' }));
+      }
+
+      updatePipLayout();
+
+      let durationLoaded = false;
+      const setupDuration = (vid) => {
+        if (durationLoaded) return;
+        const dur = vid.duration;
+        if (dur && !isNaN(dur) && dur !== Infinity) {
+          durationLoaded = true;
+          trimStart = 0;
+          trimEnd = dur;
+          trimStartSlider.max = dur;
+          trimEndSlider.max = dur;
+          trimStartSlider.value = 0;
+          trimEndSlider.value = dur;
+          trimStartVal.innerText = "0.0";
+          trimEndVal.innerText = dur.toFixed(1);
+
+          previewTimeline.max = dur;
+          previewTimeline.value = 0;
+          previewTimeVal.innerText = '0:00 / ' + formatDurationText(dur);
+        }
+      };
+
+      if (hasScreen) {
+        previewScreenVid.onloadedmetadata = () => {
+          setupDuration(previewScreenVid);
+        };
+      }
+      if (hasWebcam) {
+        previewWebcamVid.onloadedmetadata = () => {
+          setupDuration(previewWebcamVid);
+        };
+      }
+
+      const primaryVideo = hasScreen ? previewScreenVid : (hasWebcam ? previewWebcamVid : null);
+      if (primaryVideo) {
+        primaryVideo.ontimeupdate = () => {
+          if (!isPreviewing) return;
+          const curr = primaryVideo.currentTime;
+
+          if (curr > trimEnd || curr < trimStart) {
+            syncPlaybackTime(trimStart);
+            return;
+          }
+
+          previewTimeline.value = curr;
+          previewTimeVal.innerText = formatDurationText(curr) + ' / ' + formatDurationText(trimEnd);
+        };
+      }
+    }
+
+    function stopPreviewLoop() {
+      isPreviewing = false;
+      isPlaying = false;
+      previewPlayBtn.innerText = 'Play';
+
+      if (previewScreenVid) {
+        previewScreenVid.ontimeupdate = null;
+        previewScreenVid.pause();
+        previewScreenVid.src = "";
+        previewScreenVid.style.display = 'none';
+      }
+      if (previewWebcamVid) {
+        previewWebcamVid.ontimeupdate = null;
+        previewWebcamVid.pause();
+        previewWebcamVid.src = "";
+        previewWebcamVid.style.display = 'none';
+      }
+      if (previewMicAud) {
+        previewMicAud.pause();
+        previewMicAud.src = "";
+      }
+    }
+
+    async function generateFinalComposition() {
+      stopPreviewLoop();
+      processingStatus.style.display = 'block';
+      exportBtn.disabled = true;
+
+      const hasScreen = screenChunks.length > 0;
+      const hasWebcam = webcamChunks.length > 0;
+      const hasMic = micChunks.length > 0;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const vScreen = document.createElement('video');
+      const vWebcam = document.createElement('video');
+
+      if (hasScreen) vScreen.src = URL.createObjectURL(new Blob(screenChunks, { type: 'video/webm' }));
+      if (hasWebcam) vWebcam.src = URL.createObjectURL(new Blob(webcamChunks, { type: 'video/webm' }));
+
+      await Promise.all([
+        hasScreen ? new Promise(r => vScreen.onloadedmetadata = r) : Promise.resolve(),
+        hasWebcam ? new Promise(r => vWebcam.onloadedmetadata = r) : Promise.resolve()
+      ]);
+
+      canvas.width = hasScreen ? vScreen.videoWidth : (hasWebcam ? vWebcam.videoWidth : 1280);
+      canvas.height = hasScreen ? vScreen.videoHeight : (hasWebcam ? vWebcam.videoHeight : 720);
+
+      if (hasScreen) { vScreen.muted = true; vScreen.currentTime = trimStart; vScreen.play(); }
+      if (hasWebcam) { vWebcam.muted = true; vWebcam.currentTime = trimStart; vWebcam.play(); }
+
+      const audioCtx = new AudioContext();
+      const destAudio = audioCtx.createMediaStreamDestination();
+      let structuralAudioTracksFound = false;
+
+      if (hasMic) {
+        const aMic = document.createElement('audio');
+        aMic.src = URL.createObjectURL(new Blob(micChunks, { type: 'audio/webm' }));
+        aMic.currentTime = trimStart;
+        aMic.play();
+        const srcMic = audioCtx.createMediaElementSource(aMic);
+        srcMic.connect(destAudio);
+        structuralAudioTracksFound = true;
+      }
+
+      const canvasStream = canvas.captureStream(30);
+      if (structuralAudioTracksFound) canvasStream.addTrack(destAudio.stream.getAudioTracks()[0]);
+
+      let outputMime = 'video/mp4;codecs=h264';
+      if (!MediaRecorder.isTypeSupported(outputMime)) outputMime = 'video/webm;codecs=h264';
+
+      const finalRecorder = new MediaRecorder(canvasStream, { mimeType: outputMime });
+      const finalChunks = [];
+      finalRecorder.ondataavailable = e => { if (e.data.size > 0) finalChunks.push(e.data); };
+
+      finalRecorder.onstop = () => {
+        const compiledBlob = new Blob(finalChunks, { type: 'video/mp4' });
+        finishAndDeliver(compiledBlob);
+      };
+
+      finalRecorder.start();
+
+      function renderLoop() {
+        const targetVideo = hasScreen ? vScreen : vWebcam;
+        if (targetVideo.ended || targetVideo.paused || targetVideo.currentTime >= trimEnd) {
+          finalRecorder.stop();
+          return;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (hasScreen) {
+          ctx.drawImage(vScreen, 0, 0, canvas.width, canvas.height);
+          if (hasWebcam) {
+            const webcamWidth = vWebcam.videoWidth || 640;
+            const webcamHeight = vWebcam.videoHeight || 480;
+            const webcamAspectRatio = webcamWidth / webcamHeight;
+            const pipW = canvas.width * pipSizeScale;
+            const pipH = pipW / webcamAspectRatio;
+            let pipX = 20; let pipY = 20;
+
+            if (selectedCorner === 'top-right') pipX = canvas.width - pipW - 20;
+            else if (selectedCorner === 'bottom-left') pipY = canvas.height - pipH - 20;
+            else if (selectedCorner === 'bottom-right') {
+              pipX = canvas.width - pipW - 20;
+              pipY = canvas.height - pipH - 20;
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            const r = pipW * 0.05; // 5% corner radius proportional to pip size
+            ctx.moveTo(pipX + r, pipY);
+            ctx.lineTo(pipX + pipW - r, pipY);
+            ctx.quadraticCurveTo(pipX + pipW, pipY, pipX + pipW, pipY + r);
+            ctx.lineTo(pipX + pipW, pipY + pipH - r);
+            ctx.quadraticCurveTo(pipX + pipW, pipY + pipH, pipX + pipW - r, pipY + pipH);
+            ctx.lineTo(pipX + r, pipY + pipH);
+            ctx.quadraticCurveTo(pipX, pipY + pipH, pipX, pipY + pipH - r);
+            ctx.lineTo(pipX, pipY + r);
+            ctx.quadraticCurveTo(pipX, pipY, pipX + r, pipY);
+            ctx.closePath();
+            ctx.clip();
+
+            ctx.drawImage(vWebcam, pipX, pipY, pipW, pipH);
+            ctx.restore();
+          }
+        } else if (hasWebcam) {
+          ctx.drawImage(vWebcam, 0, 0, canvas.width, canvas.height);
+        }
+
+        requestAnimationFrame(renderLoop);
+      }
+      requestAnimationFrame(renderLoop);
+    }
+
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+      const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    // Helper to submit via a hidden iframe to bypass CORS
+    function submitViaIframe(url, payload) {
+      const targetUrl = serverUrl ? `${serverUrl.replace(/\/$/, '')}${url}` : url;
+      return new Promise((resolve) => {
+        // 1. Create a completely hidden iframe to capture the server's redirect/response
+        const iframeName = `cors_bypass_iframe_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
+        // 2. Create the form targeting the hidden iframe
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = targetUrl; 
+        form.target = iframeName;
+
+        // 4. Dynamically append each key as a hidden form input
+        for (const [key, value] of Object.entries(payload)) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = typeof value === 'object' ? JSON.stringify(value) : value;
+          form.appendChild(input);
+        }
+
+        let resolved = false;
+        const doResolve = (val) => {
+          if (resolved) return;
+          resolved = true;
+          resolve(val);
+
+          // 5. Clean up after the browser processes the submission
+          setTimeout(() => {
+            if (form.parentNode) document.body.removeChild(form);
+            if (iframe.parentNode) document.body.removeChild(iframe);
+          }, 2000);
+        };
+
+        iframe.onload = () => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const loc = iframe.contentWindow.location;
+            const searchParams = new URLSearchParams(loc.search);
+            if (searchParams.has('videoId')) {
+              doResolve({ videoId: searchParams.get('videoId') });
+              return;
+            }
+            const text = doc.body.textContent || doc.body.innerText;
+            const data = JSON.parse(text);
+            doResolve(data);
+          } catch (e) {
+            doResolve(null);
+          }
+        };
+
+        // Fallback resolve in case of cross-origin or no response onload
+        setTimeout(() => {
+          doResolve(null);
+        }, 3000);
+
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+
+    // UPDATED PIPELINE: Transcode with Mediabunny and Upload directly via new endpoints
+    async function finishAndDeliver(blob) {
+      if (!window.MediaBunny) {
+        alert("Mediabunny failed to load. Please ensure your internet connection allows CDN requests.");
+        exportBtn.disabled = false;
+        processingStatus.style.display = 'none';
+        return;
+      }
+
+      processingStatus.style.display = 'block';
+
+      try {
+        const title = prompt("Enter a title for this recording:", "Context Record " + new Date().toLocaleTimeString());
+        if (!title) {
+          processingStatus.style.display = 'none';
+          exportBtn.disabled = false;
+          return;
+        }
+
+        processingStatus.innerText = '⚙️ Creating root video record in Twenty...';
+
+        const videoData = await submitViaIframe('/s/videos/recorder-create', {
+          title,
+          userId,
+          nonce,
+          timestamp,
+          signature
+        });
+        const videoId = videoData && videoData.videoId ? videoData.videoId : 'cors_bypass_active';
+
+        processingStatus.innerText = '⚙️ Initializing Mediabunny CMAF Transcoder...';
+
+        let segments = [];
+        const input = new MediaBunny.Input({
+          formats: MediaBunny.ALL_FORMATS,
+          source: new MediaBunny.BlobSource(blob),
+        });
+
+        const getTarget = (request) => {
+          return new MediaBunny.BufferTarget({
+            onFinalize: async (buffer) => {
+              let segmentIndex = -1;
+              if (request.path.match(/^init-\\d+\\.m4s$/)) {
+                segmentIndex = 0;
+              } else {
+                const match = request.path.match(/^segment-\\d+-(\\d+)\\.m4s$/);
+                if (match) segmentIndex = parseInt(match[1], 10);
+              }
+
+              if (segmentIndex >= 0) {
+                // Base64 encode the ArrayBuffer
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                  binary += String.fromCharCode(bytes[i]);
+                }
+                const fileData = btoa(binary);
+
+                segments.push({ segmentIndex, fileName: request.path, fileData });
+              }
+            }
+          });
+        };
+
+        const target = new MediaBunny.PathedTarget('playlist.m3u8', getTarget);
+        const output = new MediaBunny.Output({
+          format: new MediaBunny.HlsOutputFormat({
+            segmentFormat: new MediaBunny.CmafOutputFormat(),
+            targetDuration: 5,
+            trimBefore: formatTime(trimStart),
+            trimAfter: formatTime(trimEnd),
+          }),
+          target: target,
+        });
+
+        const conversion = await MediaBunny.Conversion.init({
+          input,
+          output,
+          video: { forceTranscode: true, keyFrameInterval: 5 },
+          audio: { forceTranscode: true },
+          trimBefore: formatTime(trimStart),
+          trimAfter: formatTime(trimEnd),
+        });
+
+        processingStatus.innerText = '⚙️ Transcoding frames to segmented payload...';
+        await conversion.execute();
+
+        for (let i = 0; i < segments.length; i++) {
+          const seg = segments[i];
+          processingStatus.innerText = `⚙️ Uploading ${seg.fileName} (Segment ${i + 1} of ${segments.length})...`;
+
+          await submitViaIframe('/s/videos/recorder-create-segment', {
+            videoId,
+            segmentIndex: seg.segmentIndex,
+            fileName: seg.fileName,
+            fileData: seg.fileData,
+            userId, nonce, timestamp, signature
+          });
+        }
+
+        processingStatus.innerText = '✅ Recording successfully transcoded and pushed to CRM!';
+
+        if (window.opener) {
+          window.opener.postMessage({ type: 'RECORDING_COMPLETE' }, '*');
+        }
+
+        setTimeout(() => {
+          processingStatus.style.display = 'none';
+          exportBtn.disabled = false;
+        }, 3000);
+
+      } catch (err) {
+        console.error(err);
+        processingStatus.innerText = '❌ Error: ' + err.message;
+        exportBtn.disabled = false;
+        alert("Processing pipeline failed: " + err.message);
+      }
+    }
+
+    function toggleUiState(recording) {
+      if (recording) {
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-flex';
+        statusBadge.style.display = 'inline-flex';
+      } else {
+        startBtn.style.display = 'inline-flex';
+        stopBtn.style.display = 'none';
+        statusBadge.style.display = 'none';
+      }
+    }
+
+    function cleanHardwareTracks() {
+      if (screenStream) screenStream.getTracks().forEach(t => t.stop());
+      if (webcamStream) webcamStream.getTracks().forEach(t => t.stop());
+      if (micStream) micStream.getTracks().forEach(t => t.stop());
+    }
+  </script>
+</body>
+
 </html>
